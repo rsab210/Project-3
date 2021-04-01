@@ -1,0 +1,43 @@
+---
+title: "Project 3"
+author: "Roujheen Sabetan"
+date: "3/23/2021"
+output: html_document
+---
+library(dplyr)
+library(tidyverse)
+library(R.utils)
+library(ggplot2)
+library(ff)
+library(data.table)
+library(biglm)
+
+#data from USA Facts and feeding americaa
+
+food_sec <- read.csv("/Users/roujheen/Downloads/COEH/School /244/Project_3/dec19pub.csv", header=TRUE)
+
+#fixing the headers
+by_county <- data.table::fread("/Users/roujheen/Downloads/COEH/School /244/Project_3/Map the Meal Gap data/ByCounty.csv")
+by_county <- by_county[-1,]
+names(by_county) <- as.matrix(by_county[1, ])
+by_county <- by_county[-1, ]
+
+
+county_deaths <-read.csv("/Users/roujheen/Downloads/COEH/School /244/Project_3/confirmed-covid-19-deaths-in-us-by-state-and-county.csv")
+
+
+total_deaths <- county_deaths %>%
+  group_by(county_name,county_fips,state_name) %>%
+  summarise(death_c = sum(deaths, na.rm= FALSE))
+  
+names(total_deaths)[names(total_deaths) == "county_fips"] <- "FIPS"
+
+food_death<- merge(total_deaths, by_county, by="FIPS")
+
+names(food_death)[names(food_death) == "2018 Food Insecurity Rate"] <- "2018FoodInsecRate"
+
+
+plot1 <- ggplot(food_death, aes(x = death_c, y = 2018FoodInsecRate)) + geom_point()
+plot1
+#For some reason the plot isn't working, I think you have to change the data values to numerical
+
